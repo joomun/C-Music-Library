@@ -5,93 +5,59 @@
 #include <iomanip>
 #include <vector>
 
-
-const int INITIAL_CAPACITY = 10;
-
-
-
 Song::Song() : duration(0) {} // default constructor
 
 Song::Song(const std::string& t, const std::string& a, int d) : title(t), artist(a), duration(d) {}
 
-MusicLibrary::MusicLibrary() {
-    songs_ = new Song[INITIAL_CAPACITY];
-    num_songs_ = 0;
-    max_songs_ = INITIAL_CAPACITY;
-}
+MusicLibrary::MusicLibrary() {} // Updated constructor
 
-MusicLibrary::~MusicLibrary() {
-    delete[] songs_;
-}
+MusicLibrary::~MusicLibrary() {} // Updated destructor
 
 void MusicLibrary::loadSongsFromFile(const std::string& filename) {
     std::ifstream file(filename);
     std::string line;
-    int line_num = 1; // initialize line number to 1
+    int line_num = 1;
 
     while (getline(file, line)) {
-        if (num_songs_ == max_songs_) {
-            Song* temp = new Song[max_songs_ * 2];
-            for (int i = 0; i < max_songs_; i++) {
-                temp[i] = songs_[i];
-            }
-            delete[] songs_;
-            songs_ = temp;
-            max_songs_ *= 2;
-        }
-
-        std::stringstream ss(line); // create stringstream object from line
+        std::stringstream ss(line);
         std::string title, artist;
         int duration;
 
-        // extract title, artist, duration from stringstream object
         std::getline(ss, title, '\t');
-        if (title.empty()) {
-            std::cerr << "Error on line " << line_num << ": Missing title for song \"" << line << "\"" << std::endl;
-            line_num++;
-            continue;
-        }
         std::getline(ss, artist, '\t');
-        if (artist.empty()) {
-            std::cerr << "Error on line " << line_num << ": Missing artist for song \"" << line << "\"" << std::endl;
-            line_num++;
-            continue;
-        }
         ss >> duration;
-        if (duration <= 0) {
-            std::cerr << "Error on line " << line_num << ": Invalid duration for song \"" << line << "\"" << std::endl;
-            line_num++;
-            continue;
+
+        if (!title.empty() && !artist.empty() && duration > 0) {
+            Song song(title, artist, duration);
+            std::string key = title + "|" + artist;
+            struct SongKeyHash {
+                std::size_t operator()(const std::string& key) const {
+                    std::size_t h1 = std::hash<std::string>{}(key.substr(0, key.find('|')));
+                    std::size_t h2 = std::hash<std::string>{}(key.substr(key.find('|') + 1));
+                    return h1 ^ (h2 << 1);
+                }
+            };
+            songs_[key] = song;
+        } else {
+            std::cerr << "Error on line " << line_num << ": Invalid song \"" << line << "\"" << std::endl;
         }
-        
-
-        Song song(title, artist, duration);
-        songs_[num_songs_] = song;
-        num_songs_++;
         line_num++;
-
-        
     }
 
     file.close();
 }
-
 
 void MusicLibrary::displaySongs() {
     std::vector<std::string> invalid_songs;
     std::cout << "+------------------+------------------+------------------+" << std::endl;
     std::cout << "|      Title       |      Artist      |     Duration     |" << std::endl;
     std::cout << "+------------------+------------------+------------------+" << std::endl;
-    for (int i = 0; i < num_songs_; i++) {
-        if (songs_[i].title.empty() || songs_[i].artist.empty() || songs_[i].duration <= 0) {
-            std::string error_msg = "Error on line " + std::to_string(i+1) + ": Invalid song data";
-            invalid_songs.push_back(error_msg);
-            continue;
+    for (const auto& song_pair : songs_) {
+            const Song& song = song_pair.second;
+            std::cout << "| " << std::setw(20) << std::left << song.title
+                    << "| " << std::setw(16) << std::left << song.artist
+                    << "| " << std::setw(16) << std::left << song.duration << "|" << std::endl;
         }
-        std::cout << "| " << std::setw(20) << std::left << songs_[i].title
-                  << "| " << std::setw(16) << std::left << songs_[i].artist
-                  << "| " << std::setw(16) << std::left << songs_[i].duration << "|" << std::endl;
-    }
     std::cout << "+------------------+------------------+------------------+" << std::endl;
 
 }
@@ -99,9 +65,10 @@ void MusicLibrary::displaySongs() {
 
 void MusicLibrary::searchSongs(const std::string& searchQuery) {
     std::vector<Song> matchingSongs;
-    for (int i = 0; i < num_songs_; i++) {
-        if (songs_[i].title.find(searchQuery) != std::string::npos || songs_[i].artist.find(searchQuery) != std::string::npos) {
-            matchingSongs.push_back(songs_[i]);
+    for (const auto& song_pair : songs_) {
+        const Song& song = song_pair.second;
+        if (song.title.find(searchQuery) != std::string::npos || song.artist.find(searchQuery) != std::string::npos) {
+            matchingSongs.push_back(song);
         }
     }
 
