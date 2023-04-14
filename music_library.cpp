@@ -5,6 +5,9 @@
 #include <iomanip>
 #include <vector>
 #include <sstream>
+#include <algorithm>
+#include <set>
+
 
 Song::Song() : duration(0) {} // default constructor
 
@@ -73,6 +76,7 @@ void MusicLibrary::loadSongsFromFile(const std::string& filename) {
     }
     std::string line;
     int line_num = 1;
+    std::set<std::string> seen_songs; // to keep track of songs that have already been loaded
 
     while (getline(file, line)) {
         std::stringstream ss(line);
@@ -85,11 +89,18 @@ void MusicLibrary::loadSongsFromFile(const std::string& filename) {
         ss.clear();
 
         if (!title.empty() && !artist.empty() && duration > 0) {
-            Song* song = new Song(title, artist, duration);
-            std::string key = title + "|" + artist; // Create the key
-            songs_[key] = song; // Add a pointer to the song to the map
-            insertSongInTrie(song); // Insert the song into the trie
-            
+            std::string key = title + "|" + artist;
+            if (songs_.count(key) == 0 && seen_songs.count(key) == 0) { // check if the song is already in the map or has already been loaded
+                Song* song = new Song(title, artist, duration);
+                songs_[key] = song; // Add a pointer to the song to the map
+                insertSongInTrie(song); // Insert the song into the trie
+                seen_songs.insert(key); // Add the song to the set of seen songs
+            } else if (songs_.count(key) > 0) { // song already exists in the map
+                if (std::find(duplicate_songs_.begin(), duplicate_songs_.end(), key) == duplicate_songs_.end()) {
+                    duplicate_songs_.push_back(key);
+                    std::cerr << "Warning on line " << line_num << ": Duplicate song \"" << line << "\"" << std::endl;
+                }
+            } // else: song has already been loaded from a previous line, skip it
         } else {
             std::cerr << "Error on line " << line_num << ": Invalid song \"" << line << "\"" << std::endl;
         }
@@ -98,7 +109,6 @@ void MusicLibrary::loadSongsFromFile(const std::string& filename) {
 
     file.close();
 }
-
 
 
 
@@ -175,4 +185,60 @@ void MusicLibrary::searchSongsArtist(const std::string& searchQuery) {
                         << "| " << std::setw(16)<<std::left << song->duration << "|" << std::endl;}
                 std::cout << "+------------------+------------------+------------------+" << std::endl;
 }
+}
+
+void MusicLibrary::removeSongFromTrie(TrieNode* node, Song* song, const std::string& title, int index) {
+    if (index == title.length()) {
+        node->is_end_of_word = false;
+        auto it = std::find_if(node->songs.begin(), node->songs.end(),
+                               [song](Song* s) { return s->title == song->title && s->artist == song->artist; });
+        if (it != node->songs.end()) {
+            node->songs.erase(it);
+        }
+        return;
+    }
+
+    char ch = tolower(title[index]);
+    if (node->children.find(ch) != node->children.end()) {
+        removeSongFromTrie(node->children[ch], song, title, index + 1);
+        if (node->children[ch]->children.empty() && !node->children[ch]->is_end_of_word) {
+            delete node->children[ch];
+            node->children.erase(ch);
+        }
+    }
+}
+
+
+
+void MusicLibrary::removeSong(const std::string& title, const std::string& artist) {
+    std::string key = title + "|" + artist;
+    auto it = songs_.find(key);
+    if (it != songs_.end()) {
+        Song* song = it->second;
+        // Remove the song from the trie
+        removeSongFromTrie(root_, song, title, 0);
+        // Remove the song from the map
+        songs_.erase(it);
+        delete song;
+        std::cout << "Song \"" << title << "\" by \"" << artist << "\" removed from the library." << std::endl;
+    } else {
+        std::cout << "Song \"" << title << "\" by \"" << artist << "\" not found in the library." << std::endl;
+    }
+}
+
+
+void MusicLibrary::saveSongsToFile(const std::string& filename) const {
+    std::ofstream outfile(filename);
+
+    if (!outfile.is_open()) {
+        std::cerr << "Error: Unable to open file for writing." << std::endl;
+        return;
+    }
+
+    for (auto const& song : songs_) {
+        outfile << song.second->title << "\t" << song.second->artist << "\t" << song.second->duration << std::endl;
+    }
+
+    outfile.close();
+    std::cout << "Song data saved to file: " << filename << std::endl;
 }

@@ -17,7 +17,8 @@ void printMenu() {
     cout << "| 1. Display all songs                                     |" << endl;
     cout << "| 2. Search for a song by title                            |" << endl;
     cout << "| 3. Search for a song by artist                           |" << endl;
-    cout << "| 4. Exit                                                  |" << endl;
+    cout << "| 4. Remove Song by title                                  |" << endl;
+    cout << "| 5. Exit                                                  |" << endl;
     cout << "+ ======================================================== +" << endl;
 }
 
@@ -47,7 +48,9 @@ int main() {
             while (!exitProgram) {
                 int choice;
                 string searchQuery;
-
+                string title;
+                string artist;
+                bool isSaved;
                 clearScreen();
                 printMenu();
 
@@ -80,8 +83,45 @@ int main() {
                         getline(cin, searchQuery);
                         musicLibrary.searchSongsArtist(searchQuery);
                         break;
+
                     case 4:
                         clearScreen();
+                        cout << "Remove Song (REQUIRE Title & artist of the Song):" << endl;
+                        cin.ignore();
+                        cout << "Enter the title of the song: ";
+                        getline(cin, title);
+                        cout << "Enter the name of the artist: ";
+                        getline(cin, artist);
+                        musicLibrary.removeSong(title, artist);
+                        break;
+
+                    case 5:
+                        clearScreen();
+                        int saveOption;
+                        cout << "Do you want to save your changes? (1 for Yes / 2 for No): ";
+                        cin >> saveOption;
+
+                        if (saveOption == 1) {
+                            string saveOptionString;
+                            cout << "Do you want to save to a new file or overwrite the current file? (new / overwrite): ";
+                            cin >> saveOptionString;
+                            while (saveOptionString != "new" && saveOptionString != "overwrite") {
+                                cout << "Invalid option. Please enter 'new' or 'overwrite': ";
+                                cin >> saveOptionString;
+                            }
+                            if (saveOptionString == "new") {
+                                cout << "Enter the name of the new file to save: ";
+                                string newFilename;
+                                cin >> newFilename;
+                                musicLibrary.saveSongsToFile(newFilename);
+                            } else {
+                                musicLibrary.saveSongsToFile(filename);
+                            }
+                            isSaved = true;
+                        } else {
+                            isSaved = true;
+                        }
+
                         exitProgram = true;
                         break;
                     default:
