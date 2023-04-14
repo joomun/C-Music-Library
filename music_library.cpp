@@ -8,6 +8,8 @@
 
 const int INITIAL_CAPACITY = 10;
 
+
+
 Song::Song() : duration(0) {} // default constructor
 
 Song::Song(const std::string& t, const std::string& a, int d) : title(t), artist(a), duration(d) {}
@@ -61,11 +63,14 @@ void MusicLibrary::loadSongsFromFile(const std::string& filename) {
             line_num++;
             continue;
         }
+        
 
         Song song(title, artist, duration);
         songs_[num_songs_] = song;
         num_songs_++;
         line_num++;
+
+        
     }
 
     file.close();
@@ -89,16 +94,30 @@ void MusicLibrary::displaySongs() {
     }
     std::cout << "+------------------+------------------+------------------+" << std::endl;
 
-    // Display invalid songs
-    if (!invalid_songs.empty()) {
-        std::cout << std::endl << "Invalid songs:" << std::endl;
-        std::cout << "+-----------------------+" << std::endl;
-        std::cout << "|       Error Msg       |" << std::endl;
-        std::cout << "+-----------------------+" << std::endl;
-        for (const auto& invalid_song : invalid_songs) {
-            std::cout << "| " << std::setw(22) << std::left << invalid_song << "|" << std::endl;
+}
+
+
+void MusicLibrary::searchSongs(const std::string& searchQuery) {
+    std::vector<Song> matchingSongs;
+    for (int i = 0; i < num_songs_; i++) {
+        if (songs_[i].title.find(searchQuery) != std::string::npos || songs_[i].artist.find(searchQuery) != std::string::npos) {
+            matchingSongs.push_back(songs_[i]);
         }
-        std::cout << "+-----------------------+" << std::endl;
+    }
+
+    if (matchingSongs.empty()) {
+        std::cout << "No songs found matching your query." << std::endl;
+    } else {
+        std::cout << "Songs matching your query:" << std::endl;
+        std::cout << "+------------------+------------------+------------------+" << std::endl;
+        std::cout << "|      Title       |      Artist      |     Duration     |" << std::endl;
+        std::cout << "+------------------+------------------+------------------+" << std::endl;
+        for (const auto& song : matchingSongs) {
+            std::cout << "| " << std::setw(20) << std::left << song.title
+                      << "| " << std::setw(16) << std::left << song.artist
+                      << "| " << std::setw(16) << std::left << song.duration << "|" << std::endl;
+        }
+        std::cout << "+------------------+------------------+------------------+" << std::endl;
     }
 }
 

@@ -20,6 +20,7 @@ int main() {
             MusicLibrary musicLibrary;
             musicLibrary.loadSongsFromFile(filename);
 
+            while (!exitProgram) {
             int choice;
             string searchQuery;
 
@@ -45,6 +46,7 @@ int main() {
                 default:
                     cout << "Invalid choice. Please try again." << endl;
                     break;
+            }
             }
         }
 
