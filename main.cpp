@@ -23,6 +23,7 @@ void printMenu() {
 }
 
 int main() {
+    
     clearScreen();
     string filename;
     bool exitProgram = false;
@@ -44,7 +45,9 @@ int main() {
         } else {
             MusicLibrary musicLibrary;
             musicLibrary.loadSongsFromFile(filename);
-            
+            cout << endl << "These are the errors and have been skipped.Double Press enter to continue...";
+            cin.ignore();
+            cin.get();
             while (!exitProgram) {
                 int choice;
                 string searchQuery;

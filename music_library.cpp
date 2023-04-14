@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include <set>
+#include <map> // add this line
 
 
 Song::Song() : duration(0) {} // default constructor
@@ -76,6 +77,7 @@ void MusicLibrary::loadSongsFromFile(const std::string& filename) {
     }
     std::string line;
     int line_num = 1;
+    std::map<std::string, Song*> temp_songs; // temporary map to store lowercase key-value pairs
     std::set<std::string> seen_songs; // to keep track of songs that have already been loaded
 
     while (getline(file, line)) {
@@ -90,12 +92,14 @@ void MusicLibrary::loadSongsFromFile(const std::string& filename) {
 
         if (!title.empty() && !artist.empty() && duration > 0) {
             std::string key = title + "|" + artist;
-            if (songs_.count(key) == 0 && seen_songs.count(key) == 0) { // check if the song is already in the map or has already been loaded
+            std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){ return std::tolower(c); }); // convert key to lowercase
+            if (temp_songs.count(key) == 0 && songs_.count(key) == 0 && seen_songs.count(key) == 0) { // check if the song is already in the map or has already been loaded
                 Song* song = new Song(title, artist, duration);
                 songs_[key] = song; // Add a pointer to the song to the map
+                temp_songs[key] = song; // Add a pointer to the temporary map
                 insertSongInTrie(song); // Insert the song into the trie
                 seen_songs.insert(key); // Add the song to the set of seen songs
-            } else if (songs_.count(key) > 0) { // song already exists in the map
+            } else if (temp_songs.count(key) > 0 || songs_.count(key) > 0) { // song already exists in the map or temporary map
                 if (std::find(duplicate_songs_.begin(), duplicate_songs_.end(), key) == duplicate_songs_.end()) {
                     duplicate_songs_.push_back(key);
                     std::cerr << "Warning on line " << line_num << ": Duplicate song \"" << line << "\"" << std::endl;
@@ -109,6 +113,7 @@ void MusicLibrary::loadSongsFromFile(const std::string& filename) {
 
     file.close();
 }
+
 
 
 
