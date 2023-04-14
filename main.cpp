@@ -1,10 +1,12 @@
 #include "music_library.h"
 #include <iostream>
 #include <string>
+#include <limits>
 
 using namespace std;
 
 int main() {
+    system("cls");
     string filename;
     bool exitProgram = false;
 
@@ -19,34 +21,52 @@ int main() {
         } else {
             MusicLibrary musicLibrary;
             musicLibrary.loadSongsFromFile(filename);
-
+            
             while (!exitProgram) {
-            int choice;
-            string searchQuery;
+                int choice;
+                string searchQuery;
 
-            cout << endl << "Please choose an option:" << endl;
-            cout << "1. Display all songs" << endl;
-            cout << "2. Search for a song" << endl;
-            cout << "3. Exit" << endl;
-            cin >> choice;
+                cout << endl << "Please choose an option:" << endl;
+                cout << "1. Display all songs" << endl;
+                cout << "2. Search for a song by title" << endl;
+                cout << "3. Search for a song by artist" << endl;
+                cout << "4. Exit" << endl;
 
-            switch (choice) {
-                case 1:
-                    musicLibrary.displaySongs();
-                    break;
-                case 2:
-                    cin.ignore();
-                    cout << "Enter a search query: ";
-                    getline(cin, searchQuery);
-                    musicLibrary.searchSongs(searchQuery);
-                    break;
-                case 3:
-                    exitProgram = true;
-                    break;
-                default:
-                    cout << "Invalid choice. Please try again." << endl;
-                    break;
-            }
+                if (!(cin >> choice)) {
+                    
+                    cout << "Invalid input. Please enter a valid integer." << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                switch (choice) {
+                    case 1:
+                        system("cls"); 
+                        musicLibrary.displaySongs();
+                        break;
+                    case 2:
+                        system("cls"); 
+                        cin.ignore();
+                        cout << "Enter title of song ";
+                        getline(cin, searchQuery);
+                        musicLibrary.searchSongs(searchQuery);
+                        break;
+                    case 3:
+                        system("cls"); 
+                        cin.ignore();
+                        cout << "Enter name of artist: ";
+                        getline(cin, searchQuery);
+                        musicLibrary.searchSongsArtist(searchQuery);
+                        break;
+                    case 4:
+                        system("cls"); 
+                        exitProgram = true;
+                        break;
+                    default:
+                        cout << "Invalid choice. Please try again." << endl;
+                        break;
+                }
             }
         }
 
