@@ -5,13 +5,35 @@
 
 using namespace std;
 
+void clearScreen() {
+    cout << "\033[2J\033[1;1H"; // ANSI escape sequence to clear terminal screen
+}
+
+void printMenu() {
+    cout << "+ ======================================================== +" << endl;
+    cout << "|                    Music Library                         |" << endl;
+    cout << "+ ======================================================== +" << endl;
+    cout << "| Please choose an option:                                 |" << endl;
+    cout << "| 1. Display all songs                                     |" << endl;
+    cout << "| 2. Search for a song by title                            |" << endl;
+    cout << "| 3. Search for a song by artist                           |" << endl;
+    cout << "| 4. Exit                                                  |" << endl;
+    cout << "+ ======================================================== +" << endl;
+}
+
 int main() {
-    system("cls");
+    clearScreen();
     string filename;
     bool exitProgram = false;
 
     do {
-        cout << "Enter the name of the file to load (or 'exit' to quit): ";
+        cout << "+ ======================================================================= + "<< endl;
+        cout << "|                                 Welcome to                              |"<< endl;
+        cout << "|                            Music Library App                            |"<< endl;
+        cout << "|                                                                         |"<< endl;
+        cout << "+ ======================================================================= +"<< endl;
+        cout << "              Enter the name of the file to load (or 'exit' to quit)    "<< endl;
+        cout << "                                ";
         getline(cin, filename);
 
         if (filename == "exit") {
@@ -26,14 +48,10 @@ int main() {
                 int choice;
                 string searchQuery;
 
-                cout << endl << "Please choose an option:" << endl;
-                cout << "1. Display all songs" << endl;
-                cout << "2. Search for a song by title" << endl;
-                cout << "3. Search for a song by artist" << endl;
-                cout << "4. Exit" << endl;
+                clearScreen();
+                printMenu();
 
                 if (!(cin >> choice)) {
-                    
                     cout << "Invalid input. Please enter a valid integer." << endl;
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -42,35 +60,44 @@ int main() {
 
                 switch (choice) {
                     case 1:
-                        system("cls"); 
+                        clearScreen();
+                        cout << "All Songs:" << endl;
                         musicLibrary.displaySongs();
                         break;
                     case 2:
-                        system("cls"); 
+                        clearScreen();
+                        cout << "Search by Title:" << endl;
                         cin.ignore();
-                        cout << "Enter title of song ";
+                        cout << "Enter the title of the song: ";
                         getline(cin, searchQuery);
                         musicLibrary.searchSongs(searchQuery);
                         break;
                     case 3:
-                        system("cls"); 
+                        clearScreen();
+                        cout << "Search by Artist:" << endl;
                         cin.ignore();
-                        cout << "Enter name of artist: ";
+                        cout << "Enter the name of the artist: ";
                         getline(cin, searchQuery);
                         musicLibrary.searchSongsArtist(searchQuery);
                         break;
                     case 4:
-                        system("cls"); 
+                        clearScreen();
                         exitProgram = true;
                         break;
                     default:
                         cout << "Invalid choice. Please try again." << endl;
                         break;
                 }
+                
+                cout << endl << "Double Press enter to continue...";
+                cin.ignore();
+                cin.get();
             }
         }
 
     } while (!exitProgram);
 
+    clearScreen();
+    cout << "Thank you for using Music Library! Goodbye!" << endl;
     return 0;
 }
