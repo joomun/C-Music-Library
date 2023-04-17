@@ -34,6 +34,7 @@ private:
     void searchSongsInTrie(TrieNode *node, const std::string &query, int index, std::vector<Song *> &matchingSongs) const;
     void removeSongFromTrie(TrieNode *node, Song *song, const std::string &title, int index);
     std::vector<std::string> duplicate_songs_;
+    void addSong(const std::string &title, const std::string &artist, int duration); // Add this line
 
 public:
     MusicLibrary();
@@ -44,7 +45,9 @@ public:
     void displaySongs() const;
     void removeSong(const std::string &title, const std::string &artist);
     void saveSongsToFile(const std::string &filename) const;
+    void addSongsToLibraryFromFile(const std::string &additionalSongsFile);
 };
+
 
 struct SongKeyHash
 {

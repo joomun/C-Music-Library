@@ -307,3 +307,73 @@ void MusicLibrary::saveSongsToFile(const std::string &filename) const
     outfile.close();
     std::cout << "Song data saved to file: " << filename << std::endl;
 }
+
+void MusicLibrary::addSongsToLibraryFromFile(const std::string &filename)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        std::cerr << "Error: failed to open file " << filename << std::endl;
+        return;
+    }
+    std::string line;
+    int line_num = 1;
+
+    while (getline(file, line))
+    {
+        std::stringstream ss(line);
+        std::string title, artist, duration_str;
+        int duration;
+
+        std::getline(ss, title, '\t');
+        std::getline(ss, artist, '\t');
+        std::getline(ss, duration_str, '\t');
+        ss.clear();
+
+        if (!title.empty() && !artist.empty() && !duration_str.empty())
+        {
+            try
+            {
+                duration = std::stoi(duration_str);
+                if (duration <= 0)
+                {
+                    throw std::invalid_argument("invalid duration");
+                }
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Error on line " << line_num << ": Invalid duration \"" << duration_str << "\"" << std::endl;
+                line_num++;
+                continue;
+            }
+
+            addSong(title, artist, duration);
+        }
+        else
+        {
+            std::cerr << "Error on line " << line_num << ": Invalid song \"" << line << "\"" << std::endl;
+        }
+        line_num++;
+    }
+
+    file.close();
+}
+void MusicLibrary::addSong(const std::string &title, const std::string &artist, int duration)
+{
+    std::string key = title + "|" + artist;
+    std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c)
+                   { return std::tolower(c); }); // convert key to lowercase
+
+    // Check for duplicates
+    if (songs_.count(key) > 0)
+    {
+        std::cerr << "Warning: Duplicate song \"" << title << "\" by " << artist << " not added to the library." << std::endl;
+        return;
+    }
+
+    // Add the song if not a duplicate
+    Song *newSong = new Song(title, artist, duration);
+    songs_.insert({key, newSong});
+    insertSongInTrie(newSong);
+}
+

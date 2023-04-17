@@ -20,7 +20,8 @@ void printMenu()
     cout << "| 2. Search for a song by title                            |" << endl;
     cout << "| 3. Search for a song by artist                           |" << endl;
     cout << "| 4. Remove Song by title                                  |" << endl;
-    cout << "| 5. Exit                                                  |" << endl;
+    cout << "| 5. Add songs from file                                   |" << endl;
+    cout << "| 6. Exit                                                  |" << endl;
     cout << "+ ======================================================== +" << endl;
 }
 
@@ -30,6 +31,7 @@ int main()
     clearScreen();
     string filename;
     bool exitProgram = false;
+    bool isSaved = false;
 
     do
     {
@@ -64,7 +66,7 @@ int main()
                 string searchQuery;
                 string title;
                 string artist;
-                bool isSaved;
+                string additionalSongsFile;
                 clearScreen();
                 printMenu();
 
@@ -112,6 +114,15 @@ int main()
                     break;
 
                 case 5:
+                    clearScreen();
+                    cout << "Add Songs from File:" << endl;
+                    cin.ignore();
+                    cout << "Enter the name of the file to load additional songs: ";
+                    getline(cin, additionalSongsFile);
+                    musicLibrary.addSongsToLibraryFromFile(additionalSongsFile);
+                    break;
+
+                case 6:
                     clearScreen();
                     int saveOption;
                     cout << "Do you want to save your changes? (1 for Yes / 2 for No): ";
@@ -165,3 +176,4 @@ int main()
     cout << "Thank you for using Music Library! Goodbye!" << endl;
     return 0;
 }
+
