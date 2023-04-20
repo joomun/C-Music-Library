@@ -52,6 +52,9 @@
         "future": "cpp",
         "mutex": "cpp",
         "ratio": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "optional": "cpp",
+        "regex": "cpp",
+        "string_view": "cpp"
     }
 }

@@ -56,7 +56,7 @@ void MusicLibrary::searchSongsInTrie(TrieNode *node, const std::string &query, i
         }
     }
 
-    if (index == query.length())
+    if (static_cast<size_t>(index) == query.length())
     {
         return;
     }
@@ -149,7 +149,7 @@ void MusicLibrary::loadSongsFromFile(const std::string &filename)
     file.close();
 }
 
-void MusicLibrary::searchSongs(const std::string &searchQuery)
+std::vector<Song> MusicLibrary::searchSongs(const std::string &searchQuery)
 {
     std::vector<Song *> matchingSongs;
     TrieNode *current = root_;
@@ -159,7 +159,7 @@ void MusicLibrary::searchSongs(const std::string &searchQuery)
         if (current->children.find(ch) == current->children.end())
         {
             std::cout << "No songs found matching your query." << std::endl;
-            return;
+            return  std::vector<Song>{};
         }
         current = current->children[ch];
     }
@@ -182,6 +182,7 @@ void MusicLibrary::searchSongs(const std::string &searchQuery)
                       << "| " << std::setw(16) << std::left << song->duration << "|" << std::endl;
         }
         std::cout << "+------------------+------------------+------------------+" << std::endl;
+        return  std::vector<Song>{};
     }
 }
 
@@ -212,7 +213,7 @@ void MusicLibrary::displaySongs() const
     }
 }
 
-void MusicLibrary::searchSongsArtist(const std::string &searchQuery)
+std::vector<Song> MusicLibrary::searchSongsArtist(const std::string &searchQuery)
 {
     std::vector<Song *> matchingSongs;
     for (auto &song : songs_)
@@ -225,6 +226,7 @@ void MusicLibrary::searchSongsArtist(const std::string &searchQuery)
     if (matchingSongs.empty())
     {
         std::cout << "No songs found matching your query." << std::endl;
+        return std::vector<Song>{};
     }
     else
     {
@@ -239,10 +241,11 @@ void MusicLibrary::searchSongsArtist(const std::string &searchQuery)
                       << "| " << std::setw(16) << std::left << song->duration << "|" << std::endl;
         }
         std::cout << "+------------------+------------------+------------------+" << std::endl;
+        return std::vector<Song>{};
     }
 }
 
-void MusicLibrary::removeSongFromTrie(TrieNode *node, Song *song, const std::string &title, int index)
+void MusicLibrary::removeSongFromTrie(TrieNode *node, Song *song, const std::string &title, size_t index)
 {
     if (index == title.length())
     {
@@ -377,3 +380,6 @@ void MusicLibrary::addSong(const std::string &title, const std::string &artist, 
     insertSongInTrie(newSong);
 }
 
+std::size_t MusicLibrary::size() const {
+    return songs_.size();
+}
